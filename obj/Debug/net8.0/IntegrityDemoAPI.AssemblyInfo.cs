@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IntegrityDemoAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4518c33e02c17820d7cd5e2ee9bb010647b64b5c")]
 [assembly: System.Reflection.AssemblyProductAttribute("IntegrityDemoAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IntegrityDemoAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
