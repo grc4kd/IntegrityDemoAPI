@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrityDemoAPI", "webapi\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{DB329C65-95B5-420B-B92C-B173ACA162C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "core", "core\core.csproj", "{1B1F6B1A-89F0-4E1D-A64A-FC7D95D13724}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{DB329C65-95B5-420B-B92C-B173ACA162C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB329C65-95B5-420B-B92C-B173ACA162C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB329C65-95B5-420B-B92C-B173ACA162C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B1F6B1A-89F0-4E1D-A64A-FC7D95D13724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B1F6B1A-89F0-4E1D-A64A-FC7D95D13724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B1F6B1A-89F0-4E1D-A64A-FC7D95D13724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B1F6B1A-89F0-4E1D-A64A-FC7D95D13724}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
