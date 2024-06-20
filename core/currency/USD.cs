@@ -13,8 +13,8 @@ public record struct USD : ICurrency
         return false;
     }
 
-    public readonly double MinimumAmount()
+    public readonly decimal MinimumDenomination()
     {
-        return 0.01d;
+        return .01m;
     }
 }
