@@ -1,7 +1,7 @@
-namespace core;
+namespace core.currency;
 
-public interface ICurrency {
-    static string CurrencyCode { get; } = string.Empty;
-
-    static decimal MinimumDenomination { get; } = 0.01m;
+public interface ICurrency
+{
+    public string CurrencyCode { get; }
+    public decimal MinimumDenomination { get; }
 }

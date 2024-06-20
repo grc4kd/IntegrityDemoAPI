@@ -1,11 +1,7 @@
-namespace core;
+namespace core.currency;
 
-public record struct USD : ICurrency
+record struct USD : ICurrency
 {
-    public static string CurrencyCode => "USD";
-
-    public static decimal MinimumDenomination
-    {
-        get { return .01m; }
-    }
+    public readonly string CurrencyCode => "USD";
+    public readonly decimal MinimumDenomination => 0.01m;
 }

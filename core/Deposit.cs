@@ -1,3 +1,5 @@
+using core.currency;
+
 namespace core;
 
 public class Deposit(ICurrency currency, decimal amount)

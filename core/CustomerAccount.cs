@@ -26,7 +26,7 @@ public class CustomerAccount
 
     public void MakeDeposit(Deposit deposit)
     {
-        if (deposit.Currency is USD) {
+        if (deposit.Currency is currency.USD) {
             balance += deposit.Amount;
         }
     }

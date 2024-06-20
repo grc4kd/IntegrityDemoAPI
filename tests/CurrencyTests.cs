@@ -1,4 +1,5 @@
 using core;
+using core.currency;
 
 namespace tests;
 
@@ -6,19 +7,15 @@ public class CurrencyTests
 {
     [Fact]
     public void USD_IsPreloaded() {
-        Assert.NotNull(Currencies.currencyDict[USD.CurrencyCode]);
+        var currency = Currencies.GetCurrency("USD");
+
+        Assert.NotNull(currency);
     }
 
     [Fact]
-    public void CurrencyValue_DecimalStruct() {
-        Assert.IsType<decimal>(USD.MinimumDenomination);
-    }
-}
+    public void CurrencyValue_USD_HasDecimalStruct() {
+        var currency = Currencies.GetCurrency("USD");
 
-static public class Currencies
-{
-    public static readonly Dictionary<string, ICurrency> currencyDict = new()
-    {
-        {USD.CurrencyCode, new USD()}
-    };
+        Assert.IsType<decimal>(currency.MinimumDenomination);
+    }
 }
