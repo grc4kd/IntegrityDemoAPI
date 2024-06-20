@@ -3,9 +3,9 @@ namespace core;
 public class CustomerAccount
 {
     public required Customer Customer { get; init; } = new Customer("NONE");
-    private double balance = 0.00;
+    private decimal balance = 0.00m;
 
-    private bool ValidateConstructorParameters(double openingBalance) {
+    private bool ValidateConstructorParameters(decimal openingBalance) {
         if (openingBalance < 0) {
             throw new ArgumentOutOfRangeException(nameof(openingBalance), 
                 $"{nameof(openingBalance)} cannot be negative. Value: {openingBalance}");
@@ -14,7 +14,7 @@ public class CustomerAccount
         return true;
     }
 
-    public CustomerAccount(double openingBalance = 0) {
+    public CustomerAccount(decimal openingBalance = 0) {
         if (!ValidateConstructorParameters(openingBalance)) {
             return;
         }
@@ -31,7 +31,7 @@ public class CustomerAccount
         }
     }
 
-    public double GetBalance() {
+    public decimal GetBalance() {
         return balance;
     }
 }

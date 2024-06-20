@@ -5,16 +5,13 @@ namespace tests;
 public class CurrencyTests
 {
     [Fact]
-    public void USDComparable_ToUSD() {
-        var usd1 = new USD();
-        var usd2 = new USD();
-        
-        Assert.Equal(usd1, usd2);
+    public void USD_IsPreloaded() {
+        Assert.NotNull(Currencies.currencyDict[USD.CurrencyCode]);
     }
 
     [Fact]
-    public void USD_IsPreloaded() {
-        Assert.NotNull(Currencies.currencyDict[USD.CurrencyCode]);
+    public void CurrencyValue_DecimalStruct() {
+        Assert.IsType<decimal>(USD.MinimumDenomination);
     }
 }
 

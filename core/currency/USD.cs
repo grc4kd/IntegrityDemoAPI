@@ -4,17 +4,8 @@ public record struct USD : ICurrency
 {
     public static string CurrencyCode => "USD";
 
-    public readonly bool Equals(ICurrency? other)
+    public static decimal MinimumDenomination
     {
-        if (other is USD) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public readonly decimal MinimumDenomination()
-    {
-        return .01m;
+        get { return .01m; }
     }
 }

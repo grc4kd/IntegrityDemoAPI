@@ -1,7 +1,7 @@
 namespace core;
 
-public class Deposit(ICurrency currency, double amount)
+public class Deposit(ICurrency currency, decimal amount)
 {
     public ICurrency Currency { get; init; } = currency;
-    public double Amount { get; init; } = amount;
+    public decimal Amount { get; init; } = amount;
 }
