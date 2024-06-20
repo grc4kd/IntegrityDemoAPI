@@ -1,10 +1,10 @@
 namespace core;
 
-public class USD : ICurrency
+public record struct USD : ICurrency
 {
     public static string CurrencyCode => "USD";
 
-    public bool Equals(ICurrency? other)
+    public readonly bool Equals(ICurrency? other)
     {
         if (other is USD) {
             return true;
@@ -13,7 +13,7 @@ public class USD : ICurrency
         return false;
     }
 
-    public double MinimumAmount()
+    public readonly double MinimumAmount()
     {
         return 0.01d;
     }

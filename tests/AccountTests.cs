@@ -9,7 +9,7 @@ public class AccountTests
     {
         var customer = new Customer(name: "Joe Stevenson");
         var account = new CustomerAccount(openingBalance: 2175.13) { Customer = customer };
-        var deposit = new Deposit(currency: new USD(), amount: 112.00);
+        var deposit = new Deposit(currency: Currencies.currencyDict[USD.CurrencyCode], amount: 112.00);
 
         var expectedBalance = 2287.13d;
 
