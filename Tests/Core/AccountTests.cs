@@ -1,7 +1,7 @@
-using core;
-using core.currency;
+using Core.Currency;
+using Core.Models;
 
-namespace tests;
+namespace Tests.Core;
 
 public class AccountTests
 {
@@ -14,8 +14,8 @@ public class AccountTests
 
         var currency = Currencies.GetCurrency("USD");
         var customer = new Customer(name: "Joe Stevenson");
-        var account = new CustomerAccount(openingBalance) { Customer = customer };
-        var deposit = new Deposit(currency, amount);
+        var account = new CustomerAccount(customer, openingBalance);
+        var deposit = new Deposit(amount);
 
         account.MakeDeposit(deposit);
 

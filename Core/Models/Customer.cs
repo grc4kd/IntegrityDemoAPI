@@ -1,4 +1,4 @@
-﻿namespace core;
+﻿namespace Core.Models;
 
 public class Customer(string name)
 {

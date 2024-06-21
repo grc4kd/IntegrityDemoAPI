@@ -1,4 +1,4 @@
-namespace core.currency;
+namespace Core.Currency;
 
 public static class Currencies
 {
