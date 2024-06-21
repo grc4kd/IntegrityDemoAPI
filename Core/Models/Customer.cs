@@ -1,11 +1,7 @@
 ﻿namespace Core.Models;
 
-public class Customer(string name)
+public class Customer(long id = 0, string name = "")
 {
-    private string Name { get; set; } = name;
-
-    public void ChangeName(string name)
-    {
-        Name = name;
-    }
+    public long Id { get; set; } = id;
+    public string Name { get; private set; } = name;
 }

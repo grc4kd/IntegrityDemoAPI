@@ -2,45 +2,30 @@ namespace Core.Models;
 
 public class CustomerAccount : IAccount
 {
-    private readonly Customer customer;
-    private decimal balance = 0.00m;
-    private int lastIdSeed = -1;
+    public long Id { get; }
+    public Customer Customer { get; }
+    public long CustomerId { get; }
+    public decimal Balance { get; private set; }
 
-
-    public long Id
+    public CustomerAccount(Customer customer, decimal openingBalance = 0)
     {
-        get
+        Customer = customer;
+
+        if (ValidateConstructorParameters(openingBalance))
         {
-            var seed = lastIdSeed;
-
-            object _lock = new();
-
-            lock (_lock) 
-            {
-                if (lastIdSeed == seed)
-                {
-                    checked {
-                        seed++;
-                    }
-
-                    lastIdSeed = ++seed;   
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"Expected {nameof(lastIdSeed)}: {lastIdSeed} to equal {nameof(seed)}: seed in lock.");
-                }
-            }
-            if (lastIdSeed != seed) {
-                throw new InvalidOperationException(
-                    $"Expected {nameof(lastIdSeed)}: {lastIdSeed} to equal {nameof(seed)}: seed after lock.");
-            }
-
-            return seed;
+            Balance = openingBalance;
         }
     }
 
-    private bool ValidateConstructorParameters(decimal? openingBalance)
+    public void MakeDeposit(Deposit deposit)
+    {
+        if (deposit.Currency is Currency.USD)
+        {
+            Balance += deposit.Amount;
+        }
+    }
+
+    private static bool ValidateConstructorParameters(decimal openingBalance)
     {
         if (openingBalance < 0)
         {
@@ -49,33 +34,5 @@ public class CustomerAccount : IAccount
         }
 
         return true;
-    }
-
-    public CustomerAccount(Customer customer, decimal openingBalance = 0)
-    {
-        this.customer = customer;
-
-        if (!ValidateConstructorParameters(openingBalance))
-        {
-            return;
-        }
-
-        if (openingBalance > 0)
-        {
-            balance += openingBalance;
-        }
-    }
-
-    public void MakeDeposit(Deposit deposit)
-    {
-        if (deposit.Currency is Currency.USD)
-        {
-            balance += deposit.Amount;
-        }
-    }
-
-    public decimal GetBalance()
-    {
-        return balance;
     }
 }

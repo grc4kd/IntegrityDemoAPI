@@ -1,32 +1,39 @@
-using Core.Models;
-using Core.Repositories;
-using Moq;
+using DataContext.Models;
+using DataContext.Repositories;
 
 namespace Tests.WebApi;
 
-public class AccountApiTests
+public class AccountRepositoryTests(TestDatabaseFixture Fixture) : IClassFixture<TestDatabaseFixture>
 {
-    private const long expectedAccountId = 17;
-    private static readonly Customer customer = new("Bank of America");
+    private readonly AccountRepository _repository = new(Fixture.CreateContext());
 
     [Fact]
-    public void DepositAmount_Response_Balance()
+    public async Task MakeDeposit_InspectResponse()
     {
-        var expectedBalance = 2287.13m;
+        decimal openingBalance = 2175.13m;
+        decimal expectedBalance = 2287.13m;
+        decimal depositAmount = 112;
 
-        decimal amount = 112;
-        var openingBalance = 2175.13m;
-        var deposit = new Deposit(amount);
+        const long expectedAccountId = 17;
+        const long expectedCustomerId = 5;
+        var customer = new Customer() { Name = "Hank Rodgers" };
+        var customerAccount = new CustomerAccount()
+        {
+            Customer = customer,
+            Id = expectedAccountId,
+            OpeningBalance = openingBalance
+        };
 
-        var customerAccount = new CustomerAccount(customer, openingBalance);
+        var depositResponse = await _repository.MakeDepositAsync(customerAccount, depositAmount);
 
-        var mockAccountSet = new Mock<IAccountSet>();
-        mockAccountSet.Setup(mock => mock.GetAccount(expectedAccountId)).Returns(customerAccount);
+        Assert.NotNull(depositResponse);
 
-        var accountRepository = new AccountRepository(mockAccountSet.Object);
-
-        var depositResponse = accountRepository.MakeDeposit(customerAccount, amount);
-
-        Assert.Equal(expectedBalance, depositResponse.Balance);
+        Assert.Multiple(() =>
+        {
+            Assert.Equal(expectedAccountId, depositResponse.AccountId);
+            Assert.Equal(expectedCustomerId, depositResponse.CustomerId);
+            Assert.Equal(expectedBalance, depositResponse.Balance);
+            Assert.True(depositResponse.Succeeded);
+        });
     }
 }

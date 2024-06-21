@@ -3,7 +3,8 @@ namespace Core.Models;
 public interface IAccount
 {
     public long Id { get; }
-    public void MakeDeposit(Deposit deposit);
+    public long CustomerId { get; }
+    public decimal Balance { get; }
 
-    public decimal GetBalance();
+    public void MakeDeposit(Deposit deposit);
 }
