@@ -4,6 +4,8 @@ using DataContext;
 using DataContext.Repositories;
 using DataContext.Responses;
 using DataContext.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using DataContext.Requests;
 
 namespace WebApi.Controllers
 {
@@ -18,6 +20,24 @@ namespace WebApi.Controllers
         {
             _context = context;
             _repository = new AccountRepository(context);
+        }
+
+
+        // POST: api/Account/MakeDeposit
+        /// <summary>
+        /// Facilitate a request to deposit a dollar amount in a customers account.
+        /// </summary>
+        /// <returns><see cref="DepositResponse"/>a JSON response with deposit transaction data</returns>
+        [ProducesErrorResponseType(typeof(BadRequest))]
+        [HttpPost("MakeDeposit")]
+        public async Task<ActionResult<DepositResponse>> MakeDeposit(DepositRequest depositRequest) {
+            var customer = await _repository.GetAccountAsync(depositRequest.AccountId);
+
+            if (customer.Id != depositRequest.CustomerId) {
+                return BadRequest($"Customer ID does not match account for ${nameof(DepositRequest)}.");
+            }
+
+            return await _repository.MakeDepositAsync(customer, (decimal)depositRequest.Amount);
         }
 
         // GET: api/Account
@@ -102,17 +122,6 @@ namespace WebApi.Controllers
         private bool CustomerAccountExists(long id)
         {
             return _context.Accounts.Any(e => e.Id == id);
-        }
-
-        public async Task<ActionResult<DepositResponse>> MakeDeposit(long accountId, decimal depositAmount)
-        {
-            var account = await _repository.GetAccountAsync(accountId);
-
-            if (account == null) {
-                return NotFound(accountId);
-            }
-
-            return await _repository.MakeDepositAsync(account, depositAmount);
         }
     }
 }

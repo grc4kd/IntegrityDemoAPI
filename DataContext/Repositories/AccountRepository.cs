@@ -22,7 +22,7 @@ public class AccountRepository
             return account;
         }
 
-        throw new ArgumentOutOfRangeException(nameof(id), $"{GetType().Name} not found by ID.");
+        throw new ArgumentOutOfRangeException(nameof(id), $"{typeof(CustomerAccount)} not found by ID.");
     }
 
     public async Task<List<CustomerAccount>> GetAccountListAsync()
@@ -42,8 +42,8 @@ public class AccountRepository
         }
 
         var accountEntity = await _accountDb.Accounts
-            .Include(account => account.Customer)
-            .Where(account => account.Id == account.Id)
+            .Include(a => a.Customer)
+            .Where(a => a.Id == account.Id)
             .SingleAsync();
 
         if (accountEntity == null) {

@@ -2,7 +2,7 @@ namespace DataContext.Requests;
 
 public record DepositRequest
 {
-    public long customerId;
-    public long accountId;
-    public double amount;
+    public long CustomerId { get; set; }
+    public long AccountId { get; set; }
+    public double Amount { get; set; }
 }
