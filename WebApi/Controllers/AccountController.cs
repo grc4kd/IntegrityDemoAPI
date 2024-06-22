@@ -13,45 +13,25 @@ namespace WebApi.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly AccountContext _context;
         private readonly AccountRepository _repository;
 
-        public AccountController(AccountContext context)
+        public AccountController(DbContextOptions<AccountContext> options)
         {
-            _context = context;
-            _repository = new AccountRepository(context);
-        }
-
-
-        // POST: api/Account/MakeDeposit
-        /// <summary>
-        /// Facilitate a request to deposit a dollar amount in a customers account.
-        /// </summary>
-        /// <returns><see cref="DepositResponse"/>a JSON response with deposit transaction data</returns>
-        [ProducesErrorResponseType(typeof(BadRequest))]
-        [HttpPost("MakeDeposit")]
-        public async Task<ActionResult<DepositResponse>> MakeDeposit(DepositRequest depositRequest) {
-            var customer = await _repository.GetAccountAsync(depositRequest.AccountId);
-
-            if (customer.Id != depositRequest.CustomerId) {
-                return BadRequest($"Customer ID does not match account for ${nameof(DepositRequest)}.");
-            }
-
-            return await _repository.MakeDepositAsync(customer, (decimal)depositRequest.Amount);
+            _repository = new AccountRepository(options);
         }
 
         // GET: api/Account
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CustomerAccount>>> GetAccounts()
+        public ActionResult<IEnumerable<CustomerAccount>> GetAccounts()
         {
-            return await _context.Accounts.ToListAsync();
+            return _repository.GetAccountList();
         }
 
         // GET: api/Account/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<CustomerAccount>> GetCustomerAccountAsync(long id)
+        public ActionResult<CustomerAccount> GetCustomerAccountAsync(long id)
         {
-            var customerAccount = await _context.Accounts.FindAsync(id);
+            var customerAccount = _repository.GetAccount(id);
 
             if (customerAccount == null)
             {
@@ -64,29 +44,18 @@ namespace WebApi.Controllers
         // PUT: api/Account/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomerAccount(long id, CustomerAccount customerAccount)
+        public IActionResult PutCustomerAccount(long id, CustomerAccount customerAccount)
         {
             if (id != customerAccount.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(customerAccount).State = EntityState.Modified;
+            var result = _repository.PutCustomerAccount(id, customerAccount);
 
-            try
+            if (!result)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomerAccountExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();
@@ -95,33 +64,73 @@ namespace WebApi.Controllers
         // POST: api/Account
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CustomerAccount>> PostCustomerAccount(CustomerAccount customerAccount)
+        public ActionResult<CustomerAccount> PostCustomerAccount(CustomerAccount customerAccount)
         {
-            _context.Accounts.Add(customerAccount);
-            await _context.SaveChangesAsync();
+            _repository.AddAccount(customerAccount);
 
             return CreatedAtAction("GetCustomerAccount", new { id = customerAccount.Id }, customerAccount);
         }
 
+        // POST: api/Account/MakeDeposit
+        /// <summary>
+        /// Facilitate a request to deposit a dollar amount in a customers account.
+        /// </summary>
+        /// <returns><see cref="DepositResponse"/>a JSON response with deposit transaction data</returns>
+        [ProducesErrorResponseType(typeof(BadRequest))]
+        [HttpPost("MakeDeposit")]
+        public ActionResult<DepositResponse> MakeDeposit(DepositRequest depositRequest)
+        {
+            var account = _repository.GetAccount(depositRequest.AccountId);
+
+            if (account == null)
+            {
+                return NotFound($"Could not find customer account, request: ${depositRequest}");
+            }
+
+            if (account.Customer.Id != depositRequest.CustomerId)
+            {
+                return BadRequest($"Customer ID does not match account for {nameof(DepositRequest)}.");
+            }
+
+            return _repository.MakeDeposit(account, (decimal)depositRequest.Amount);
+        }
+
+        // POST: api/Account/MakeDeposit
+        /// <summary>
+        /// Facilitate a request to deposit a dollar amount in a customers account.
+        /// </summary>
+        /// <returns><see cref="WithdrawalResponse"/>a JSON response with withdrawal transaction data</returns>
+        [ProducesErrorResponseType(typeof(BadRequest))]
+        [HttpPost("MakeWithdrawal")]
+        public ActionResult<WithdrawalResponse> MakeWithdrawal(DepositRequest depositRequest)
+        {
+            var account = _repository.GetAccount(depositRequest.AccountId);
+
+            if (account == null)
+            {
+                return NotFound($"Could not find customer account, request: {depositRequest}");
+            }
+
+            if (account.Customer.Id != depositRequest.CustomerId)
+            {
+                return BadRequest($"Customer ID does not match account for {nameof(DepositRequest)}.");
+            }
+
+            return _repository.MakeWithdrawal(account, (decimal)depositRequest.Amount);
+        }
+
         // DELETE: api/Account/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomerAccount(long id)
+        public IActionResult DeleteCustomerAccount(long id)
         {
-            var customerAccount = await _context.Accounts.FindAsync(id);
-            if (customerAccount == null)
+            var result = _repository.DeleteAccount(id);
+
+            if (!result)
             {
                 return NotFound();
             }
 
-            _context.Accounts.Remove(customerAccount);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool CustomerAccountExists(long id)
-        {
-            return _context.Accounts.Any(e => e.Id == id);
         }
     }
 }

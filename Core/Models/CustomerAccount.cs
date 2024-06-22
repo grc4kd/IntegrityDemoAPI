@@ -1,6 +1,6 @@
 namespace Core.Models;
 
-public class CustomerAccount : IAccount
+public class CustomerAccount
 {
     public long Id { get; }
     public Customer Customer { get; }
@@ -22,6 +22,21 @@ public class CustomerAccount : IAccount
         if (deposit.Currency is Currency.USD)
         {
             Balance += deposit.Amount;
+        }
+    }
+
+    public void MakeWithdrawal(Withdrawal withdrawal)
+    {
+        if (withdrawal.Currency is Currency.USD)
+        {
+            var remainingBalance = Balance - withdrawal.Amount;
+
+            if (remainingBalance < 0) {
+                throw new ArgumentOutOfRangeException(nameof(withdrawal), "Insufficient funds to make withdrawal.");
+            }
+            if (remainingBalance >= 0) {
+                Balance = remainingBalance;
+            }
         }
     }
 

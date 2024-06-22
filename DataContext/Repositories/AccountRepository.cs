@@ -6,59 +6,139 @@ namespace DataContext.Repositories;
 
 public class AccountRepository
 {
-    private readonly AccountContext _accountDb;
+    private readonly DbContextOptions<AccountContext> _options;
 
-    public AccountRepository(AccountContext accountDb)
+    public AccountRepository(DbContextOptions<AccountContext> options)
     {
-        _accountDb = accountDb;
+        _options = options;
     }
 
-    public async Task<CustomerAccount> GetAccountAsync(long id)
+    public void AddAccount(CustomerAccount customerAccount)
     {
-        var account = await _accountDb.Accounts.FindAsync(id);
+        using var context = new AccountContext(_options);
+        
+        context.Accounts.Add(customerAccount);
+        context.SaveChanges();
+    }
 
-        if (account != null)
+    public bool DeleteAccount(long id)
+    {
+        using var context = new AccountContext(_options);
+
+        var customerAccount = context.Accounts.Find(id);
+        if (customerAccount == null)
         {
-            return account;
+            return false;
         }
 
-        throw new ArgumentOutOfRangeException(nameof(id), $"{typeof(CustomerAccount)} not found by ID.");
+        context.Accounts.Remove(customerAccount);
+        context.SaveChanges();
+
+        return true;
     }
 
-    public async Task<List<CustomerAccount>> GetAccountListAsync()
+    public CustomerAccount? GetAccount(long id)
     {
+        using var context = new AccountContext(_options);
+        return context.Accounts
+            .Include(a => a.Customer)
+            .SingleOrDefault(a => a.Id == id);
+    }
+
+    public List<CustomerAccount> GetAccountList()
+    {
+        using var context = new AccountContext(_options);
+
         var maxAccounts = 100;
-        return await _accountDb.Accounts
+        return context.Accounts
+            .Include(a => a.Customer)
             .OrderBy(a => a.Id)
             .Take(maxAccounts)
-            .ToListAsync();
+            .ToList();
     }
 
-    public async Task<DepositResponse> MakeDepositAsync(CustomerAccount account, decimal amount)
+    public DepositResponse MakeDeposit(CustomerAccount account, decimal amount)
     {
         if (amount < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(amount), $"Expected deposit amount to be positive or zero.");
         }
 
-        var accountEntity = await _accountDb.Accounts
+        using var context = new AccountContext(_options);
+
+        var accountEntity = context.Accounts
             .Include(a => a.Customer)
             .Where(a => a.Id == account.Id)
-            .SingleAsync();
+            .SingleOrDefault();
 
         if (accountEntity == null) {
             throw new ArgumentException("Customer account could not be found.", nameof(account));
         }
 
         var customerModel = new Core.Models.Customer(accountEntity.Id, accountEntity.Customer.Name);
-        var accountModel = new Core.Models.CustomerAccount(customerModel, accountEntity.OpeningBalance);
+        var accountModel = new Core.Models.CustomerAccount(customerModel, accountEntity.Balance);
 
         accountModel.MakeDeposit(new(amount));
 
         accountEntity.Balance = accountModel.Balance;
 
-        await _accountDb.SaveChangesAsync();
+        context.SaveChanges();
         
         return new DepositResponse(accountEntity);
     }
+
+    public WithdrawalResponse MakeWithdrawal(CustomerAccount account, decimal amount)
+    {
+        if (amount <= 0) {
+            throw new ArgumentOutOfRangeException(nameof(amount), $"Expected withdrawal amount to be greater than zero.");
+        }
+
+        using var context = new AccountContext(_options);
+
+        var accountEntity = context.Accounts
+            .Include(a => a.Customer)
+            .Where(a => a.Id == account.Id)
+            .SingleOrDefault();
+
+        if (accountEntity == null) {
+            throw new ArgumentException("Customer account could not be found.", nameof(account));
+        }
+
+        var customerModel = new Core.Models.Customer(accountEntity.Id, accountEntity.Customer.Name);
+        var accountModel = new Core.Models.CustomerAccount(customerModel, accountEntity.Balance);
+
+        accountModel.MakeWithdrawal(new(amount));
+
+        accountEntity.Balance = accountModel.Balance;
+
+        context.SaveChanges();
+        
+        return new WithdrawalResponse(accountEntity);
+    }
+
+    public bool PutCustomerAccount(long id, CustomerAccount customerAccount)
+    {
+        using var context = new AccountContext(_options);
+
+        context.Entry(customerAccount).State = EntityState.Modified;
+
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!context.Accounts.Any(e => e.Id == id))
+            {
+                return false;
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        return true;
+    }
 }
+

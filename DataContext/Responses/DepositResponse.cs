@@ -2,17 +2,14 @@ using DataContext.Models;
 
 namespace DataContext.Responses;
 
-public class DepositResponse(long customerId, long accountId, decimal balance, bool succeeded)
+public record DepositResponse(long CustomerId, long AccountId, decimal Balance, bool Succeeded)
+    : AccountResponse(CustomerId, AccountId, Balance, Succeeded)
 {
-    public long CustomerId { get; } = customerId;
-    public long AccountId { get; } = accountId;
-    public decimal Balance { get; } = balance;
-    public bool Succeeded { get; } = succeeded;
-
-    public DepositResponse(CustomerAccount customerAccount) : this(
-        customerAccount.Customer.Id,
-        customerAccount.Id,
-        customerAccount.Balance,
-        succeeded: customerAccount.Id > -1 && customerAccount.Customer.Id > -1)
+    public DepositResponse(IAccount account) : this(
+        account.Customer.Id,
+        account.Id,
+        account.Balance,
+        Succeeded: account.Id > -1 && account.Customer.Id > -1
+    )
     { }
 }
