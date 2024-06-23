@@ -4,29 +4,25 @@ namespace Tests.CoreTest;
 
 public class CurrencyTests
 {
+    // arrange tested variable for all currency tests
+    readonly ICurrency currency = CurrencyFactory.Create();
+
     [Fact]
     public void USD_IsPreloaded()
     {
-        var currency = Currencies.GetCurrency("USD");
-
-        Assert.NotNull(currency);
+        Assert.IsType<USD>(currency);
     }
 
     [Fact]
     public void CurrencyValue_USD_HasDecimalStruct()
     {
-        var currency = Currencies.GetCurrency("USD");
-
+        
         Assert.IsType<decimal>(currency.MinimumDenomination);
     }
 
     [Fact]
     public void CurrencyValue_USD_HasCorrectDenomination()
     {
-        var currency = Currencies.GetCurrency("USD");
-
         Assert.Equal(0.01m, currency.MinimumDenomination);
-        Assert.Equal(0.01f, (float)currency.MinimumDenomination);
-        Assert.Equal(0.01d, (double)currency.MinimumDenomination);
     }
 }

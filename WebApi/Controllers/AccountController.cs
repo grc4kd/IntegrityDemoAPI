@@ -6,6 +6,7 @@ using DataContext.Responses;
 using DataContext.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using DataContext.Requests;
+using Core.Currency;
 
 namespace WebApi.Controllers
 {
@@ -13,6 +14,7 @@ namespace WebApi.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
+        private readonly USD usdCurrency = new USD();
         private readonly AccountRepository _repository;
 
         public AccountController(DbContextOptions<AccountContext> options)
@@ -80,6 +82,12 @@ namespace WebApi.Controllers
         [HttpPost("MakeDeposit")]
         public ActionResult<DepositResponse> MakeDeposit(DepositRequest depositRequest)
         {
+            var decimalDepositAmount = (decimal)depositRequest.Amount;
+            if (decimalDepositAmount.Scale > usdCurrency.MinimumDenomination.Scale) 
+            {
+                return BadRequest($"Deposit amount: {depositRequest.Amount} has fractional value less than the minimum denomination for {usdCurrency.CurrencyCode}");
+            }
+
             var account = _repository.GetAccount(depositRequest.AccountId);
 
             if (account == null)
@@ -104,6 +112,12 @@ namespace WebApi.Controllers
         [HttpPost("MakeWithdrawal")]
         public ActionResult<WithdrawalResponse> MakeWithdrawal(DepositRequest depositRequest)
         {
+            var decimalDepositAmount = (decimal)depositRequest.Amount;
+            if (decimalDepositAmount.Scale > usdCurrency.MinimumDenomination.Scale) 
+            {
+                return BadRequest($"Withdrawal amount: {depositRequest.Amount} has fractional value less than the minimum denomination for {usdCurrency.CurrencyCode}");
+            }
+
             var account = _repository.GetAccount(depositRequest.AccountId);
 
             if (account == null)
