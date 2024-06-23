@@ -3,10 +3,8 @@ using DataContext.Models;
 
 namespace DataContext;
 
-public class AccountContext : DbContext
+public class AccountContext(DbContextOptions<AccountContext> options) : DbContext(options)
 {
-    public AccountContext(DbContextOptions<AccountContext> options) : base(options) { }
-    
     public DbSet<CustomerAccount> Accounts { get; set; } = null!;
     public DbSet<Customer> Customers { get; set; } = null!;
 

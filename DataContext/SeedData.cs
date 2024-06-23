@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataContext;
 
-public static class SeedData
+public class SeedData
 {
     public static void Initialize(DbContextOptions<AccountContext> contextOptions)
     {

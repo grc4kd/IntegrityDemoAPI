@@ -1,6 +1,6 @@
 namespace DataContext.Models;
 
-public record CustomerAccount : IAccount
+public class CustomerAccount : IAccount
 {
     public Customer Customer { get; set; } = null!;
     public long Id { get; set; }

@@ -4,14 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataContext.Repositories;
 
-public class AccountRepository
+public class AccountRepository(DbContextOptions<AccountContext> options)
 {
-    private readonly DbContextOptions<AccountContext> _options;
-
-    public AccountRepository(DbContextOptions<AccountContext> options)
-    {
-        _options = options;
-    }
+    private readonly DbContextOptions<AccountContext> _options = options;
 
     public void AddAccount(CustomerAccount customerAccount)
     {
@@ -62,7 +57,7 @@ public class AccountRepository
             .ToList();
     }
 
-    public DepositResponse MakeDeposit(CustomerAccount customerAccount, decimal amount)
+    public DepositResponse MakeDeposit(CustomerAccount toAccount, decimal amount)
     {
         if (amount < 0)
         {
@@ -70,30 +65,22 @@ public class AccountRepository
         }
 
         using var context = new AccountContext(_options);
+        
+        CustomerAccount customerAccount = FindCustomerAccount(toAccount);
 
-        var account = context.Accounts
-            .Include(a => a.Customer)
-            .Where(a => a.Id == customerAccount.Id)
-            .SingleOrDefault();
+        var customer = new Core.Models.Customer(customerAccount.Id, toAccount.Customer.Name);
+        var account = new Core.Models.CustomerAccount(customerAccount.Customer.Id, toAccount.Balance);
 
-        if (account == null)
-        {
-            throw new ArgumentException("Customer account could not be found.", nameof(customerAccount));
-        }
+        account.MakeDeposit(new(amount));
 
-        var customerModel = new Core.Models.Customer(account.Id, account.Customer.Name);
-        var accountModel = new Core.Models.CustomerAccount(customerModel, account.Balance);
-
-        accountModel.MakeDeposit(new(amount));
-
-        account.Balance = accountModel.Balance;
+        customerAccount.Balance = account.Balance;
 
         context.SaveChanges();
 
-        return new DepositResponse(account);
+        return new DepositResponse(customerAccount);
     }
 
-    public WithdrawalResponse MakeWithdrawal(CustomerAccount account, decimal amount)
+    public WithdrawalResponse MakeWithdrawal(CustomerAccount fromAccount, decimal amount)
     {
         if (amount <= 0)
         {
@@ -102,23 +89,19 @@ public class AccountRepository
 
         using var context = new AccountContext(_options);
 
-        context.Attach(account);
+        CustomerAccount customerAccount = FindCustomerAccount(fromAccount);
 
-        if (account == null)
-        {
-            throw new ArgumentException("Customer account could not be found.", nameof(account));
-        }
+        var customer = new Core.Models.Customer(fromAccount.Id, fromAccount.Customer.Name);
+        var account = new Core.Models.CustomerAccount(customerAccount.Customer.Id, fromAccount.Balance);
 
-        var customerModel = new Core.Models.Customer(account.Id, account.Customer.Name);
-        var accountModel = new Core.Models.CustomerAccount(customerModel, account.Balance);
+        
+        account.MakeWithdrawal(new(amount));
 
-        accountModel.MakeWithdrawal(new(amount));
-
-        account.Balance = accountModel.Balance;
+        customerAccount.Balance = account.Balance;
 
         context.SaveChanges();
 
-        return new WithdrawalResponse(account);
+        return new WithdrawalResponse(customerAccount);
     }
 
     public CloseAccountResponse CloseAccount(long id)
@@ -141,8 +124,8 @@ public class AccountRepository
                 $"Unknown {nameof(Core.Models.AccountStatusCode)} was found: {account.AccountStatus}");
         }
 
-        var accountStatusModel = new Core.Models.AccountStatus(accountStatusCode);
-        var accountModel = new Core.Models.Account(account.Id, account.Balance, accountStatusCode);
+        Core.Models.AccountStatus accountStatusModel = new(accountStatusCode);
+        Core.Models.Account accountModel = new(account.Id, account.Balance, accountStatusCode);
 
         accountModel.CloseAccount();
 
@@ -182,6 +165,16 @@ public class AccountRepository
         }
 
         return true;
+    }
+
+    private CustomerAccount FindCustomerAccount(CustomerAccount customerAccount)
+    {
+        using var context = new AccountContext(_options);
+
+        return context.Accounts
+            .Include(a => a.Customer)
+            .Where(a => a.Id == customerAccount.Id)
+            .SingleOrDefault() ?? throw new ArgumentException("Customer account could not be found.", nameof(customerAccount));
     }
 }
 

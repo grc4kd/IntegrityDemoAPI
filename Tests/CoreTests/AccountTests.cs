@@ -1,6 +1,6 @@
 using Core.Models;
 
-namespace Tests.CoreTest;
+namespace Tests.CoreTests;
 
 public class AccountTests
 {
@@ -8,11 +8,10 @@ public class AccountTests
     public void DepositAmount_CheckBalance()
     {
         decimal amount = 112;
-        var openingBalance = 2175.13m;
         var expectedBalance = 2287.13m;
 
         var customer = new Customer(name: "Joe Stevenson");
-        var account = new CustomerAccount(customer, openingBalance);
+        var account = new CustomerAccount(openingBalance: 2175.13m);
         var deposit = new Deposit(amount);
 
         account.MakeDeposit(deposit);
@@ -24,10 +23,9 @@ public class AccountTests
     public void WithdrawAmount_CheckBalance() 
     {
         decimal amount = 112;
-        decimal openingBalance = 2399.13m;
         decimal expectedBalance = 2287.13m;
         
-        var account = new CustomerAccount(new(name: "Steve Tulip"), openingBalance);
+        var account = new CustomerAccount(openingBalance: 2399.13m);
         var withdrawal = new Withdrawal(amount);
 
         account.MakeWithdrawal(withdrawal);
@@ -38,7 +36,8 @@ public class AccountTests
     [Fact]
     public void NewAccount_CheckStatus()
     {
-        var account = new CustomerAccount(new(name: "Vijaya Singh"));
+        long accountId = 1;
+        var account = new Account(accountId);
 
         Assert.Equal(AccountStatusCode.OPEN, account.AccountStatus.StatusCode);
     }
@@ -46,7 +45,8 @@ public class AccountTests
     [Fact]
     public void CloseAccount_CheckStatus()
     {
-        var account = new CustomerAccount(new(name: "Roger Wilco"));
+        long accountId = 2;
+        var account = new Account(accountId);
 
         account.CloseAccount();
 
@@ -56,7 +56,9 @@ public class AccountTests
     [Fact]
     public void CloseAccount_WithNonZeroBalance_CheckException() 
     {
-        var account = new CustomerAccount(new(name: "Butch Harris"), 1234);
+        long accountId = 3;
+        decimal balance = 0.10m;
+        var account = new Account(accountId, balance);
 
         Assert.Throws<InvalidOperationException>(account.CloseAccount);
     }
@@ -64,8 +66,8 @@ public class AccountTests
     [Fact]
     public void CloseAccount_AlreadyClosed_CheckException()
     {
-        var account = new CustomerAccount(new(name: "James Torvich"));
-        account.CloseAccount();
+        long accountId = 4;
+        var account = new Account(accountId, statusCode: AccountStatusCode.CLOSED);
 
         Assert.Throws<InvalidOperationException>(account.CloseAccount);
     }

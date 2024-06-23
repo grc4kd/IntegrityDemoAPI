@@ -4,7 +4,7 @@ using DataContext.Repositories;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-namespace Tests.WebApiTest;
+namespace Tests.WebApiTests;
 
 public class AccountRepositoryTests : IDisposable
 {
@@ -17,6 +17,8 @@ public class AccountRepositoryTests : IDisposable
 
     public AccountRepositoryTests()
     {
+        Environment.SetEnvironmentVariable("DefaultCurrencyCode", "USD");
+
         _connection = new SqliteConnection("Filename=:memory:");
         _connection.Open();
 
@@ -70,16 +72,16 @@ public class AccountRepositoryTests : IDisposable
         resetContext.SaveChanges();
 
         var repository = new AccountRepository(_contextOptions);
-        var depositResponse = repository.MakeDeposit(testAccount, depositAmount);
+        var response = repository.MakeDeposit(testAccount, depositAmount);
 
-        Assert.NotNull(depositResponse);
+        Assert.NotNull(response);
 
         Assert.Multiple(() =>
         {
-            Assert.Equal(expectedAccountId, depositResponse.AccountId);
-            Assert.Equal(expectedCustomerId, depositResponse.CustomerId);
-            Assert.Equal(expectedBalance, depositResponse.Balance);
-            Assert.True(depositResponse.Succeeded);
+            Assert.Equal(expectedAccountId, response.AccountId);
+            Assert.Equal(expectedCustomerId, response.CustomerId);
+            Assert.Equal(expectedBalance, response.Balance);
+            Assert.True(response.Succeeded);
         });
     }
 
@@ -100,16 +102,16 @@ public class AccountRepositoryTests : IDisposable
         resetContext.SaveChanges();
 
         var repository = new AccountRepository(_contextOptions);
-        var depositResponse = repository.MakeWithdrawal(testAccount, withdrawalAmount);
+        var response = repository.MakeWithdrawal(testAccount, withdrawalAmount);
 
-        Assert.NotNull(depositResponse);
+        Assert.NotNull(response);
 
         Assert.Multiple(() =>
         {
-            Assert.Equal(expectedAccountId, depositResponse.AccountId);
-            Assert.Equal(expectedCustomerId, depositResponse.CustomerId);
-            Assert.Equal(expectedBalance, depositResponse.Balance);
-            Assert.True(depositResponse.Succeeded);
+            Assert.Equal(expectedAccountId, response.AccountId);
+            Assert.Equal(expectedCustomerId, response.CustomerId);
+            Assert.Equal(expectedBalance, response.Balance);
+            Assert.True(response.Succeeded);
         });
     }
 

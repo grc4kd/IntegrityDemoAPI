@@ -1,15 +1,14 @@
-using Core.Currency;
+using Core.Models.CurrencyTypes;
 
 namespace Core.Models;
 
-public class Withdrawal(decimal amount, ICurrency currency)
+public class Withdrawal(decimal amount, Currency currency)
 {
-    public ICurrency Currency { get; init; } = currency;
+    public Currency Currency { get; init; } = currency;
     public decimal Amount { get; init; } = amount;
 
     /// <summary>
-    /// Allow constructor using the implied default currency.
+    /// Allow constructor using the default currency from environment variables
     /// </summary>
-    /// <param name="amount"></param>
     public Withdrawal(decimal amount) : this(amount, CurrencyFactory.Create()) {}
 }
