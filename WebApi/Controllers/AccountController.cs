@@ -119,6 +119,34 @@ namespace WebApi.Controllers
             return _repository.MakeWithdrawal(account, (decimal)depositRequest.Amount);
         }
 
+        // POST: api/Account/CloseAccount
+        /// <summary>
+        /// Facilitate a request to close a customers account.
+        /// </summary>
+        /// <returns><see cref="CloseAccountResponse"/>a JSON response with withdrawal transaction data</returns>
+        [ProducesErrorResponseType(typeof(BadRequest))]
+        [HttpPost("CloseAccount")]
+        public ActionResult<CloseAccountResponse> CloseAccount(CloseAccountRequest request)
+        {
+            var account = _repository.GetAccount(request.AccountId);
+
+            if (account == null)
+            {
+                return NotFound($"Could not find customer account, request: {request}");
+            }
+
+            if (account.Customer.Id != request.CustomerId)
+            {
+                return BadRequest($"Customer ID does not match account for {nameof(DepositRequest)}.");
+            }
+
+            if (account.Balance != 0) {
+                return BadRequest("Account can only be closed if the balance is exactly 0.");
+            }
+
+            return _repository.CloseAccount(request.AccountId);
+        }
+
         // DELETE: api/Account/5
         [HttpDelete("{id}")]
         public IActionResult DeleteCustomerAccount(long id)

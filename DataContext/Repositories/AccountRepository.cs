@@ -15,8 +15,13 @@ public class AccountRepository
 
     public void AddAccount(CustomerAccount customerAccount)
     {
+        // set customer account balance to opening balance unless a different value has already been set in data model
+        if (customerAccount.Balance == 0) {
+            customerAccount.Balance = customerAccount.OpeningBalance;
+        }
+
         using var context = new AccountContext(_options);
-        
+
         context.Accounts.Add(customerAccount);
         context.SaveChanges();
     }
@@ -57,7 +62,7 @@ public class AccountRepository
             .ToList();
     }
 
-    public DepositResponse MakeDeposit(CustomerAccount account, decimal amount)
+    public DepositResponse MakeDeposit(CustomerAccount customerAccount, decimal amount)
     {
         if (amount < 0)
         {
@@ -66,54 +71,98 @@ public class AccountRepository
 
         using var context = new AccountContext(_options);
 
-        var accountEntity = context.Accounts
+        var account = context.Accounts
             .Include(a => a.Customer)
-            .Where(a => a.Id == account.Id)
+            .Where(a => a.Id == customerAccount.Id)
             .SingleOrDefault();
 
-        if (accountEntity == null) {
-            throw new ArgumentException("Customer account could not be found.", nameof(account));
+        if (account == null)
+        {
+            throw new ArgumentException("Customer account could not be found.", nameof(customerAccount));
         }
 
-        var customerModel = new Core.Models.Customer(accountEntity.Id, accountEntity.Customer.Name);
-        var accountModel = new Core.Models.CustomerAccount(customerModel, accountEntity.Balance);
+        var customerModel = new Core.Models.Customer(account.Id, account.Customer.Name);
+        var accountModel = new Core.Models.CustomerAccount(customerModel, account.Balance);
 
         accountModel.MakeDeposit(new(amount));
 
-        accountEntity.Balance = accountModel.Balance;
+        account.Balance = accountModel.Balance;
 
         context.SaveChanges();
-        
-        return new DepositResponse(accountEntity);
+
+        return new DepositResponse(account);
     }
 
     public WithdrawalResponse MakeWithdrawal(CustomerAccount account, decimal amount)
     {
-        if (amount <= 0) {
+        if (amount <= 0)
+        {
             throw new ArgumentOutOfRangeException(nameof(amount), $"Expected withdrawal amount to be greater than zero.");
         }
 
         using var context = new AccountContext(_options);
 
-        var accountEntity = context.Accounts
-            .Include(a => a.Customer)
-            .Where(a => a.Id == account.Id)
-            .SingleOrDefault();
+        context.Attach(account);
 
-        if (accountEntity == null) {
+        if (account == null)
+        {
             throw new ArgumentException("Customer account could not be found.", nameof(account));
         }
 
-        var customerModel = new Core.Models.Customer(accountEntity.Id, accountEntity.Customer.Name);
-        var accountModel = new Core.Models.CustomerAccount(customerModel, accountEntity.Balance);
+        var customerModel = new Core.Models.Customer(account.Id, account.Customer.Name);
+        var accountModel = new Core.Models.CustomerAccount(customerModel, account.Balance);
 
         accountModel.MakeWithdrawal(new(amount));
 
-        accountEntity.Balance = accountModel.Balance;
+        account.Balance = accountModel.Balance;
 
         context.SaveChanges();
+
+        return new WithdrawalResponse(account);
+    }
+
+    public CloseAccountResponse CloseAccount(long id)
+    {
+        using var context = new AccountContext(_options);
+
+        var account = context.Accounts
+            .Include(a => a.Customer)
+            .Where(a => a.Id == id)
+            .SingleOrDefault();
+
+        if (account == null)
+        {
+            throw new ArgumentException("Customer account could not be found.", nameof(id));
+        }
+
+        if (!Enum.TryParse<Core.Models.AccountStatusCode>(account.AccountStatus, out var accountStatusCode))
+        {
+            throw new ArgumentException(
+                $"Unknown {nameof(Core.Models.AccountStatusCode)} was found: {account.AccountStatus}");
+        }
+
+        var accountStatusModel = new Core.Models.AccountStatus(accountStatusCode);
+        var accountModel = new Core.Models.Account(account.Id, account.Balance, accountStatusCode);
+
+        if (!Enum.IsDefined(accountModel.AccountStatus.StatusCode))
+        {
+            throw new ArgumentException(
+                $"Unknown {nameof(Core.Models.AccountStatusCode)} was found: {accountModel.AccountStatus.StatusCode}");
+        }
+
+        accountModel.CloseAccount();
+
+        if (accountModel.AccountStatus.StatusCode == accountStatusModel.StatusCode)
+        {
+            throw new InvalidOperationException(
+                $"Account status has already been changed from {accountStatusModel.StatusCode} to {accountModel.AccountStatus.StatusCode}");
+        }
+
+        account.AccountStatus = Enum.GetName(accountModel.AccountStatus.StatusCode)!;
         
-        return new WithdrawalResponse(accountEntity);
+        context.SaveChanges();
+
+        return new CloseAccountResponse(account);
     }
 
     public bool PutCustomerAccount(long id, CustomerAccount customerAccount)

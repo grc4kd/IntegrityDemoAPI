@@ -1,6 +1,6 @@
 using Core.Currency;
 
-namespace Tests.Core;
+namespace Tests.CoreTest;
 
 public class CurrencyTests
 {

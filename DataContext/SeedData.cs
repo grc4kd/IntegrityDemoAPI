@@ -1,7 +1,5 @@
 using DataContext.Models;
-using DataContext.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DataContext;
 

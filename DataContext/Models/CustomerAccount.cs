@@ -6,4 +6,5 @@ public record CustomerAccount : IAccount
     public long Id { get; set; }
     public decimal OpeningBalance { get; set; }
     public decimal Balance { get; set; }
+    public string AccountStatus { get; set; } = "OPEN";
 };

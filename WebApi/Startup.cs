@@ -1,6 +1,5 @@
 using DataContext;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Writers;
 
 namespace WebApi;
 
