@@ -139,4 +139,20 @@ public class AccountRepositoryTests : IDisposable
             Assert.True(closeAccountResponse.Succeeded);
         });
     }
+
+    [Fact]
+    public void InvalidStatusCode_Read_CheckException() 
+    {
+        using var resetContext = CreateContext();
+        var testAccount = CreateTestAccount();
+        resetContext.Attach(testAccount);
+
+        // database contains string values for status codes
+        testAccount.AccountStatus = "BOGUS";
+
+        resetContext.SaveChanges();
+
+        var repository = new AccountRepository(_contextOptions);
+        Assert.Throws<InvalidOperationException>(() => repository.CloseAccount(testAccount.Id));
+    }
 }

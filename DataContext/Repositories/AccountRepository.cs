@@ -137,18 +137,12 @@ public class AccountRepository
 
         if (!Enum.TryParse<Core.Models.AccountStatusCode>(account.AccountStatus, out var accountStatusCode))
         {
-            throw new ArgumentException(
+            throw new InvalidOperationException(
                 $"Unknown {nameof(Core.Models.AccountStatusCode)} was found: {account.AccountStatus}");
         }
 
         var accountStatusModel = new Core.Models.AccountStatus(accountStatusCode);
         var accountModel = new Core.Models.Account(account.Id, account.Balance, accountStatusCode);
-
-        if (!Enum.IsDefined(accountModel.AccountStatus.StatusCode))
-        {
-            throw new ArgumentException(
-                $"Unknown {nameof(Core.Models.AccountStatusCode)} was found: {accountModel.AccountStatus.StatusCode}");
-        }
 
         accountModel.CloseAccount();
 
