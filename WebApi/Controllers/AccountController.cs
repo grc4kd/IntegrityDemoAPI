@@ -58,12 +58,12 @@ namespace WebApi.Controllers
 
         // POST: api/Account
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public ActionResult<CustomerAccount> PostCustomerAccount(CustomerAccount customerAccount)
+        [HttpPost("OpenAccount")]
+        public ActionResult<CustomerAccount> OpenCustomerAccount(OpenAccountRequest request)
         {
-            _repository.AddAccount(customerAccount);
+            var openAccountResponse = _repository.OpenAccount(request);
 
-            return CreatedAtAction("GetCustomerAccount", new { id = customerAccount.Id }, customerAccount);
+            return CreatedAtAction("GetCustomerAccount", new { id = openAccountResponse.CustomerId }, openAccountResponse);
         }
 
         // POST: api/Account/MakeDeposit

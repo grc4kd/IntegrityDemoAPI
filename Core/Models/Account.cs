@@ -9,7 +9,7 @@ public class Account
     public AccountStatus AccountStatus { get; private set; }
     public Currency AccountCurrency { get; private set; }
 
-    public Account(long id, decimal balance = 0, AccountStatusCode statusCode = AccountStatusCode.OPEN)
+    public Account(long id, decimal balance = 0m, AccountStatusCode statusCode = AccountStatusCode.OPEN)
     {
         Id = id;
         Balance = balance;
@@ -23,7 +23,7 @@ public class Account
     {
         var currency = CurrencyFactory.Create();
 
-        if (Id < 0) 
+        if (Id < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(Id), "Negative account IDs are not allowed.");
         }
@@ -33,23 +33,26 @@ public class Account
             throw new ArgumentOutOfRangeException(nameof(Balance), $"{nameof(Balance)} cannot be negative. Value: {Balance}");
         }
 
-        if (Balance.Scale > currency.MinimumDenomination.Scale) 
+        if (Balance.Scale > currency.MinimumDenomination.Scale)
         {
             throw new ArgumentOutOfRangeException(nameof(Balance), $"Balance amount: {Balance} has fractional value less than the minimum denomination for currency code: {currency.CurrencyCode}.");
         }
 
-        if (Balance % currency.MinimumDenomination > 0) 
+        if (Balance % currency.MinimumDenomination > 0)
         {
             throw new ArgumentOutOfRangeException(nameof(Balance), $"Balance amount: {Balance} cannot be broken down into the minimum denomination: {currency.MinimumDenomination}.");
         }
     }
 
-    public void CloseAccount() {
-        if (AccountStatus.StatusCode == AccountStatusCode.CLOSED) {
+    public void CloseAccount()
+    {
+        if (AccountStatus.StatusCode == AccountStatusCode.CLOSED)
+        {
             throw new InvalidOperationException("The account has already been closed.");
         }
 
-        if (Balance != 0) {
+        if (Balance != 0)
+        {
             throw new InvalidOperationException("The account can only be closed if the balance is exactly 0.");
         }
 

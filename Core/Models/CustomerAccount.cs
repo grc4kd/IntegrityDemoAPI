@@ -1,10 +1,35 @@
+using Core.Models.CurrencyTypes;
+
 namespace Core.Models;
 
-public sealed class CustomerAccount(long id = 0, decimal openingBalance = 0) : Account(id, openingBalance, AccountStatusCode.OPEN)
-{
+public sealed class CustomerAccount(long id = 0) : Account(id, 0, AccountStatusCode.OPEN)
+{    
+    private readonly decimal minimumInitialDeposit = 100;
+
+    public int AccountTypeId { get; private set; }
+
+    public CustomerAccount(long id = 0, decimal balance = 0m) : this(id)
+    {
+        CurrencyFactory.Create().ValidateAmount(balance);
+
+        Balance = balance;
+    }
+
+    public void OpenAccount(Deposit initialDeposit, int accountTypeId)
+    {
+        if (initialDeposit.Amount < 100)
+        {
+            throw new ArgumentException($"Initial deposit is less than minimum required deposit: {minimumInitialDeposit}.");
+        }
+
+        Balance = initialDeposit.Amount;
+        AccountTypeId = accountTypeId;
+    }
+
     public void MakeDeposit(Deposit deposit)
     {
-        if (deposit.Currency != AccountCurrency) {
+        if (deposit.Currency != AccountCurrency)
+        {
             throw new ArgumentException($"Currency of deposit does not match account currency: {AccountCurrency}", nameof(deposit));
         }
 
@@ -13,7 +38,8 @@ public sealed class CustomerAccount(long id = 0, decimal openingBalance = 0) : A
 
     public void MakeWithdrawal(Withdrawal withdrawal)
     {
-        if (withdrawal.Currency != AccountCurrency) {
+        if (withdrawal.Currency != AccountCurrency)
+        {
             throw new ArgumentException($"Currency of withdrawal does not match account currency: {AccountCurrency}", nameof(withdrawal));
         }
 

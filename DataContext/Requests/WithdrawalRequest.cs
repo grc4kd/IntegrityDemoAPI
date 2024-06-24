@@ -1,6 +1,6 @@
 namespace DataContext.Requests;
 
-public class WithdrawalRequest
+public record struct WithdrawalRequest
 {
     public long CustomerId { get; set; }
     public long AccountId { get; set; }

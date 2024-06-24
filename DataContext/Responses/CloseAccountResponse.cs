@@ -3,7 +3,7 @@ using DataContext.Models;
 namespace DataContext.Responses;
 
 public record CloseAccountResponse(long CustomerId, long AccountId, bool Succeeded)
-    : AccountResponse(CustomerId, AccountId, Succeeded)
+    : IAccountResponse
 {
     public CloseAccountResponse(CustomerAccount account) : this(
             account.Customer.Id,

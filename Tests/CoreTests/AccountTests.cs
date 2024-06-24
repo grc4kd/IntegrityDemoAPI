@@ -10,8 +10,7 @@ public class AccountTests
         decimal amount = 112;
         var expectedBalance = 2287.13m;
 
-        var customer = new Customer(name: "Joe Stevenson");
-        var account = new CustomerAccount(openingBalance: 2175.13m);
+        var account = new CustomerAccount(balance: 2175.13m);
         var deposit = new Deposit(amount);
 
         account.MakeDeposit(deposit);
@@ -25,7 +24,7 @@ public class AccountTests
         decimal amount = 112;
         decimal expectedBalance = 2287.13m;
         
-        var account = new CustomerAccount(openingBalance: 2399.13m);
+        var account = new CustomerAccount(balance: 2399.13m);
         var withdrawal = new Withdrawal(amount);
 
         account.MakeWithdrawal(withdrawal);

@@ -1,4 +1,5 @@
 using DataContext.Models;
+using DataContext.Requests;
 using DataContext.Responses;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,12 +11,6 @@ public class AccountRepository(DbContextOptions<AccountContext> options)
 
     public void AddAccount(CustomerAccount customerAccount)
     {
-        // set customer account balance to opening balance unless a different value has already been set in data model
-        if (customerAccount.Balance == 0)
-        {
-            customerAccount.Balance = customerAccount.OpeningBalance;
-        }
-
         using var context = new AccountContext(_options);
 
         context.Accounts.Add(customerAccount);
@@ -102,6 +97,44 @@ public class AccountRepository(DbContextOptions<AccountContext> options)
         context.SaveChanges();
 
         return new WithdrawalResponse(customerAccount);
+    }
+
+
+
+    public OpenAccountResponse OpenAccount(OpenAccountRequest openAccountRequest)
+    {
+        var (customerId, initialDeposit, accountTypeId) = openAccountRequest;
+        using var context = new AccountContext(_options);
+
+        var customer = context.Find<Customer>(customerId) ??
+            throw new ArgumentException($"Customer ID {customerId} does not exist.", nameof(openAccountRequest));
+
+        if (Core.Models.AccountType.AccountTypeName(accountTypeId) == "Checking" &&
+            !context.Accounts
+            .Include(a => a.Customer)
+            .Any(a => a.Customer.Id == customerId && a.AccountTypeCode == Core.Models.AccountType.AccountTypeCode("Savings")))
+        {
+            throw new InvalidOperationException("A savings account must be created before any checking accounts.");
+        }
+
+        var account = new Core.Models.CustomerAccount(customerId);
+        var deposit = new Core.Models.Deposit((decimal)initialDeposit);
+
+        account.OpenAccount(deposit, accountTypeId);
+
+        var customerAccount = new CustomerAccount()
+        {
+            AccountStatus = account.AccountStatus.StatusCode.ToString(),
+            Balance = account.Balance,
+            Customer = customer,
+            AccountTypeCode = accountTypeId
+        };
+
+        context.Accounts.Add(customerAccount);
+
+        context.SaveChanges();
+
+        return new OpenAccountResponse(customerAccount);
     }
 
     public CloseAccountResponse CloseAccount(long id)

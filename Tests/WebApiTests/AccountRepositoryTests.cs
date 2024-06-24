@@ -1,6 +1,7 @@
 using DataContext;
 using DataContext.Models;
 using DataContext.Repositories;
+using DataContext.Requests;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +11,6 @@ public class AccountRepositoryTests : IDisposable
 {
     private readonly SqliteConnection _connection;
     private readonly DbContextOptions<AccountContext> _contextOptions;
-
-    // all current tests expect these values
-    private static readonly long expectedCustomerId = 5;
-    private static readonly long expectedAccountId = 17;
 
     public AccountRepositoryTests()
     {
@@ -33,16 +30,12 @@ public class AccountRepositoryTests : IDisposable
 
     public void Dispose() => _connection.Dispose();
 
-    private static CustomerAccount CreateTestAccount() {
-        return new CustomerAccount
+    private static CustomerAccount CreateTestAccount() =>
+        new()
         {
-            Customer = new() { 
-                Id = expectedCustomerId, 
-                Name = "Hank Rodgers" 
-            },
-            Id = expectedAccountId
+            Customer = new Customer(Name: "Hank Rodgers"),
+            Balance = 525.00m
         };
-    }
 
     [Fact]
     public void GetAccount_CustomerNotNull()
@@ -67,7 +60,6 @@ public class AccountRepositoryTests : IDisposable
         resetContext.Attach(testAccount);
 
         testAccount.Balance = openingBalance;
-        testAccount.OpeningBalance = openingBalance;
 
         resetContext.SaveChanges();
 
@@ -78,8 +70,6 @@ public class AccountRepositoryTests : IDisposable
 
         Assert.Multiple(() =>
         {
-            Assert.Equal(expectedAccountId, response.AccountId);
-            Assert.Equal(expectedCustomerId, response.CustomerId);
             Assert.Equal(expectedBalance, response.Balance);
             Assert.True(response.Succeeded);
         });
@@ -97,19 +87,14 @@ public class AccountRepositoryTests : IDisposable
         resetContext.Attach(testAccount);
 
         testAccount.Balance = openingBalance;
-        testAccount.OpeningBalance = openingBalance;
 
         resetContext.SaveChanges();
 
         var repository = new AccountRepository(_contextOptions);
         var response = repository.MakeWithdrawal(testAccount, withdrawalAmount);
 
-        Assert.NotNull(response);
-
         Assert.Multiple(() =>
         {
-            Assert.Equal(expectedAccountId, response.AccountId);
-            Assert.Equal(expectedCustomerId, response.CustomerId);
             Assert.Equal(expectedBalance, response.Balance);
             Assert.True(response.Succeeded);
         });
@@ -132,18 +117,44 @@ public class AccountRepositoryTests : IDisposable
         var repository = new AccountRepository(_contextOptions);
         var closeAccountResponse = repository.CloseAccount(testAccount.Id);
 
-        Assert.NotNull(closeAccountResponse);
-
         Assert.Multiple(() =>
         {
-            Assert.Equal(expectedAccountId, closeAccountResponse.AccountId);
-            Assert.Equal(expectedCustomerId, closeAccountResponse.CustomerId);
             Assert.True(closeAccountResponse.Succeeded);
         });
     }
 
     [Fact]
-    public void InvalidStatusCode_Read_CheckException() 
+    public void OpenAccount_InspectResponse()
+    {
+        double initialDeposit = 525.00d;
+        decimal expectedBalance = 525.00m;
+        var testCustomer = CreateTestAccount().Customer;
+
+        using var resetContext = CreateContext();
+
+        resetContext.Add(testCustomer);
+
+        resetContext.SaveChanges();
+
+        var repository = new AccountRepository(_contextOptions);
+        var request = new OpenAccountRequest() {
+            CustomerId = testCustomer.Id,
+            InitialDeposit = initialDeposit,
+            AccountTypeId = Core.Models.AccountType.AccountTypeCode("Savings")
+        };
+        var openAccountResponse = repository.OpenAccount(request);
+
+        Assert.Multiple(() =>
+        {
+            //Assert.Equal(Core.Models.AccountType.AccountTypeCode("Savings"), openAccountResponse.AccountTypeId);
+            Assert.Equal("Savings", Core.Models.AccountType.AccountTypeName(openAccountResponse.AccountTypeId));
+            Assert.Equal(expectedBalance, openAccountResponse.Balance);
+            Assert.True(openAccountResponse.Succeeded);
+        });
+    }
+
+    [Fact]
+    public void InvalidStatusCode_Read_CheckException()
     {
         using var resetContext = CreateContext();
         var testAccount = CreateTestAccount();

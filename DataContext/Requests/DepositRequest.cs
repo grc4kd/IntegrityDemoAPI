@@ -1,6 +1,6 @@
 namespace DataContext.Requests;
 
-public class DepositRequest
+public record struct DepositRequest
 {
     public long CustomerId { get; set; }
     public long AccountId { get; set; }

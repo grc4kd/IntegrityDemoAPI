@@ -7,11 +7,21 @@ public class Deposit
     public Currency Currency { get; init; }
     public decimal Amount { get; init; }
 
-    public Deposit(decimal amount, Currency currency) {
-        currency.ValidateAmount(amount);
+    public Deposit(dynamic amount, Currency currency) {
+        
+        decimal? decimalAmount = null;
+        if (amount is decimal or double or int) {
+            decimalAmount = (decimal)amount;
+        }
+
+        if (!decimalAmount.HasValue) {
+            throw new ArgumentException($"Could not cast dynamic constructor argument {amount} to decimal value type.", nameof(amount));
+        }
+
+        currency.ValidateAmount(decimalAmount.Value);
         
         Currency = currency;
-        Amount = amount;
+        Amount = decimalAmount.Value;
     }
 
     /// <summary>
