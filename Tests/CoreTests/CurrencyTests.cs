@@ -2,45 +2,41 @@ using Core.Models.CurrencyTypes;
 
 namespace Tests.CoreTests;
 
-public class CurrencyTests
+[Collection("Environment collection")]
+public class CurrencyTests(EnvironmentFixture fixture)
 {
-    // arrange tested variable for all currency tests
-    readonly Currency currency = CurrencyFactory.Create();
-
-    public CurrencyTests() {
-        Environment.SetEnvironmentVariable("DefaultCurrencyCode", "USD");
-    }
+    // test collection fixture loads default currency code for all tests in this class
+    readonly EnvironmentFixture fixture = fixture;
 
     [Fact]
-    public void USD_IsPreloaded()
+    public void EnvironmentFixture_Default_USD()
     {
-        Assert.IsType<USD>(currency);
+        string? defaultCurrencyCode = Environment.GetEnvironmentVariable("DefaultCurrencyCode");
+
+        Assert.NotNull(defaultCurrencyCode);
+        Assert.Equal(defaultCurrencyCode, CurrencyFactory.Create().CurrencyCode);
     }
 
     [Fact]
     public void CurrencyValue_USD_HasDecimalStruct()
     {
-        
-        Assert.IsType<decimal>(currency.MinimumDenomination);
+
+        Assert.IsType<decimal>(new USD().MinimumDenomination);
     }
 
     [Fact]
     public void CurrencyValue_USD_HasCorrectDenomination()
     {
-        Assert.Equal(0.01m, currency.MinimumDenomination);
+        Assert.Equal(0.01m, new USD().MinimumDenomination);
     }
 
-    [Fact]
-    public void ValidateFractionOfPennies_USD_CheckException() 
+    [Theory(DisplayName = "FractionalAmountTest")]
+    [InlineData("CLP", 0, .1)]
+    [InlineData("JOD", 0.001, .0001)]
+    [InlineData("USD", 0.01, .001)]
+    public void ValidateFractionofUnit_CheckException(string currencyCode, decimal minimumDenomination, decimal amount)
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => currency.ValidateAmount(0.001m));
-    }
-
-    [Fact]
-    public void ValidateFractionofHalfPence_GBP_CheckException()
-    {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new GBP().ValidateAmount(0.002m));
+        Currency currency = new(currencyCode, minimumDenomination);
+        Assert.Throws<ArgumentOutOfRangeException>(() => currency.ValidateAmount(amount));
     }
 }
-
-internal record GBP() : Currency("GBP", 0.005m);

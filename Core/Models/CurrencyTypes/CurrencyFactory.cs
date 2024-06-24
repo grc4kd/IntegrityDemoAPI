@@ -2,9 +2,10 @@ using System.Collections.ObjectModel;
 
 namespace Core.Models.CurrencyTypes;
 
-public class CurrencyFactory {
-    public const string DefaultCurrencyCodeEnvironmentVariableName = "DefaultCurrencyCode";
-    public static ReadOnlyDictionary<string, Currency> SupportedCurrencyCodes = 
+public class CurrencyFactory
+{
+    private const string DefaultCurrencyCodeEnvironmentVariableName = "DefaultCurrencyCode";
+    public static ReadOnlyDictionary<string, Currency> SupportedCurrencyCodes =
         new(
             new Dictionary<string, Currency>(
             [
@@ -12,11 +13,13 @@ public class CurrencyFactory {
             ]
         ));
 
-    static CurrencyFactory() {
-        var defaultCurrencyKey = Environment.GetEnvironmentVariable(DefaultCurrencyCodeEnvironmentVariableName) 
+    static CurrencyFactory()
+    {
+        var defaultCurrencyKey = Environment.GetEnvironmentVariable(DefaultCurrencyCodeEnvironmentVariableName)
             ?? throw new InvalidOperationException($"Please set the {DefaultCurrencyCodeEnvironmentVariableName} environment variable.");
 
-        if (!SupportedCurrencyCodes.TryGetValue(defaultCurrencyKey, out Currency? defaultCurrencyValue)) {
+        if (!SupportedCurrencyCodes.TryGetValue(defaultCurrencyKey, out Currency? defaultCurrencyValue))
+        {
             throw new InvalidOperationException($"The default currency code set in environment variables: {defaultCurrencyKey} is not supported.");
         }
 

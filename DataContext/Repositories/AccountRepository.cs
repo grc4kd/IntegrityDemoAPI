@@ -11,7 +11,8 @@ public class AccountRepository(DbContextOptions<AccountContext> options)
     public void AddAccount(CustomerAccount customerAccount)
     {
         // set customer account balance to opening balance unless a different value has already been set in data model
-        if (customerAccount.Balance == 0) {
+        if (customerAccount.Balance == 0)
+        {
             customerAccount.Balance = customerAccount.OpeningBalance;
         }
 
@@ -65,7 +66,7 @@ public class AccountRepository(DbContextOptions<AccountContext> options)
         }
 
         using var context = new AccountContext(_options);
-        
+
         CustomerAccount customerAccount = FindCustomerAccount(toAccount);
 
         var customer = new Core.Models.Customer(customerAccount.Id, toAccount.Customer.Name);
@@ -94,7 +95,6 @@ public class AccountRepository(DbContextOptions<AccountContext> options)
         var customer = new Core.Models.Customer(fromAccount.Id, fromAccount.Customer.Name);
         var account = new Core.Models.CustomerAccount(customerAccount.Customer.Id, fromAccount.Balance);
 
-        
         account.MakeWithdrawal(new(amount));
 
         customerAccount.Balance = account.Balance;
@@ -136,7 +136,7 @@ public class AccountRepository(DbContextOptions<AccountContext> options)
         }
 
         account.AccountStatus = Enum.GetName(accountModel.AccountStatus.StatusCode)!;
-        
+
         context.SaveChanges();
 
         return new CloseAccountResponse(account);
