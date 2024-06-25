@@ -43,7 +43,7 @@ public class CustomerAccountTests
     [Fact]
     public void NewAccount_CheckStatus()
     {
-        long accountId = 1;
+        var accountId = 1;
         var account = new Account(accountId);
 
         Assert.Equal(AccountStatusCode.OPEN, account.AccountStatus.StatusCode);
@@ -52,7 +52,7 @@ public class CustomerAccountTests
     [Fact]
     public void CloseAccount_CheckStatus()
     {
-        long accountId = 2;
+        var accountId = 2;
         var account = new Account(accountId);
 
         account.CloseAccount();
@@ -63,7 +63,7 @@ public class CustomerAccountTests
     [Fact]
     public void CloseAccount_WithNonZeroBalance_CheckException()
     {
-        long accountId = 3;
+        var accountId = 3;
         decimal balance = 0.10m;
         var account = new Account(accountId, balance);
 
@@ -73,7 +73,7 @@ public class CustomerAccountTests
     [Fact]
     public void CloseAccount_AlreadyClosed_CheckException()
     {
-        long accountId = 4;
+        var accountId = 4;
         var account = new Account(accountId, statusCode: AccountStatusCode.CLOSED);
 
         Assert.Throws<InvalidOperationException>(account.CloseAccount);

@@ -2,7 +2,7 @@ using DataContext.Models;
 
 namespace DataContext.Responses;
 
-public record CloseAccountResponse(long CustomerId, long AccountId, bool Succeeded)
+public record CloseAccountResponse(int CustomerId, int AccountId, bool Succeeded)
     : IAccountResponse
 {
     public CloseAccountResponse(CustomerAccount account) : this(

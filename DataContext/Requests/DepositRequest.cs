@@ -1,3 +1,3 @@
 namespace DataContext.Requests;
 
-public record struct DepositRequest(long CustomerId, long AccountId, double Amount);
+public record struct DepositRequest(int CustomerId, int AccountId, double Amount);

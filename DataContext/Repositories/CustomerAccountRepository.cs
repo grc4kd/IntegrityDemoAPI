@@ -13,7 +13,7 @@ public class CustomerAccountRepository : ICustomerAccountRepository
     public CustomerAccountRepository(CustomerAccountContext context) 
         => _context = context;
 
-    public CustomerAccount? GetCustomerAccount(long id)
+    public CustomerAccount? GetCustomerAccount(int id)
     {
         return _context.Accounts
             .Include(a => a.Customer)
@@ -125,7 +125,7 @@ public class CustomerAccountRepository : ICustomerAccountRepository
         return new CloseAccountResponse(customerAccount);
     }
 
-    private CustomerAccount FindAccount(long id)
+    private CustomerAccount FindAccount(int id)
     {
         return _context.Accounts
             .Include(a => a.Customer)

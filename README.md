@@ -17,7 +17,7 @@ With the WebApi folder as the working directory, `dotnet ef database update` wil
 
 - dotnet run --profile https  
 
-A .NET Host should create a Kestrel cross-platform web server and output the host ports on the command line. Either http or https endpoint should be redirected to use HTTPS in middleware.
+A .NET Host should create a Kestrel cross-platform web server and output the host ports on the command line. Either http or https endpoint should be redirected to use HTTPS in middleware in production builds.
 
 ```
 Building...
@@ -30,6 +30,4 @@ Application started. Press Ctrl+C to shut down.
 
 In a web browser, visit http://localhost:5135/swagger. The page should display the Swagger API Documentation created via Swashbuckle middleware.
 
-Requirement:
-There is no seed data with this project yet, though the tests have seed data that is not persisted anywhere. Records have to be added to the database file with a sqlcmd tool or database application before running.
-
+Simple test data is seeded when running the .NET run command for the first time.

@@ -6,7 +6,7 @@ namespace DataContext.Repositories;
 
 public interface ICustomerAccountRepository
 {
-    public CustomerAccount? GetCustomerAccount(long accountId);
+    public CustomerAccount? GetCustomerAccount(int accountId);
     public IEnumerable<CustomerAccount> GetCustomerAccounts(int maxLength);
     public DepositResponse MakeDeposit(DepositRequest request);
     public WithdrawalResponse MakeWithdrawal(WithdrawalRequest request);

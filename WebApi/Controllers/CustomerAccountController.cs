@@ -23,7 +23,7 @@ namespace WebApi.Controllers
 
         // GET: api/Account/5
         [HttpGet("{accountId}")]
-        public CustomerAccount? GetCustomerAccount(long accountId)
+        public CustomerAccount? GetCustomerAccount(int accountId)
         {
             return _repository.GetCustomerAccount(accountId);
         }

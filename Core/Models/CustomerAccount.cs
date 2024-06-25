@@ -2,13 +2,13 @@ using Core.Models.CurrencyTypes;
 
 namespace Core.Models;
 
-public sealed class CustomerAccount(long id, int accountTypeId, AccountStatusCode accountStatusCode) : Account(id, 0, accountStatusCode)
+public sealed class CustomerAccount(int id, int accountTypeId, AccountStatusCode accountStatusCode) : Account(id, 0, accountStatusCode)
 {    
     private readonly decimal minimumInitialDeposit = 100;
 
     public int AccountTypeId { get; private set; } = accountTypeId;
 
-    public CustomerAccount(long id, int accountTypeId, AccountStatusCode accountStatusCode, decimal balance) : this(id, accountTypeId, accountStatusCode)
+    public CustomerAccount(int id, int accountTypeId, AccountStatusCode accountStatusCode, decimal balance) : this(id, accountTypeId, accountStatusCode)
     {
         CurrencyFactory.Create().ValidateAmount(balance);
 

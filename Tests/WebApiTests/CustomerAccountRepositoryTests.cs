@@ -175,7 +175,7 @@ public class CustomerAccountRepositoryTests : IDisposable
 
         Assert.True(response.Succeeded);
         Assert.Equal(response.CustomerId, testAccount.Customer.Id);
-        Assert.InRange(response.AccountId, 0, long.MaxValue);
+        Assert.InRange(response.AccountId, 0, int.MaxValue);
         Assert.Equal(Core.Models.AccountType.AccountTypeId("Savings"), response.AccountTypeId);
         Assert.Equal(expectedBalance, response.Balance);
     }

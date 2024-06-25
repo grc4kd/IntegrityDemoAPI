@@ -1,3 +1,3 @@
 namespace DataContext.Requests;
 
-public record struct CloseAccountRequest(long CustomerId, long AccountId);
+public record struct CloseAccountRequest(int CustomerId, int AccountId);

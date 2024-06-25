@@ -1,4 +1,5 @@
 using DataContext;
+using DataContext.Models;
 using DataContext.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,6 +44,27 @@ public class Startup
     {
         if (Environment.IsDevelopment())
         {
+            // DEMO add seed data from demo project in Development environment only
+            var contextOptions = new DbContextOptionsBuilder<CustomerAccountContext>()
+                .UseSqlite(Configuration.GetConnectionString("AccountContext"));
+            var context = new CustomerAccountContext(contextOptions.Options);
+
+            var customer = context.Customers.Find(5);
+            if (customer == null) {
+                customer = new Customer(5);
+                context.Customers.Add(customer);
+            }
+            
+            var customerAccount = context.Accounts.Find(17);
+            if (customerAccount == null) {
+                context.Accounts.Add(new CustomerAccount() {
+                    Id = 17,
+                    Customer = customer
+                });
+            }
+
+            context.SaveChanges();
+
             app.UseDeveloperExceptionPage();
 
             app.UseSwagger();

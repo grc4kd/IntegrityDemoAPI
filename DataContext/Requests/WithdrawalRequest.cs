@@ -1,3 +1,3 @@
 namespace DataContext.Requests;
 
-public record struct WithdrawalRequest(long CustomerId, long AccountId, double Amount);
+public record struct WithdrawalRequest(int CustomerId, int AccountId, double Amount);

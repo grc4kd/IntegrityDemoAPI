@@ -2,7 +2,7 @@ using DataContext.Models;
 
 namespace DataContext.Responses;
 
-public record OpenAccountResponse(long CustomerId, long AccountId, bool Succeeded, int AccountTypeId, decimal Balance)
+public record OpenAccountResponse(int CustomerId, int AccountId, bool Succeeded, int AccountTypeId, decimal Balance)
     : IAccountResponse
 {
     public OpenAccountResponse(CustomerAccount account) : this(

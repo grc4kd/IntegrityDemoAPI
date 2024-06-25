@@ -2,7 +2,7 @@ namespace DataContext.Responses;
 
 public interface IAccountResponse
 {
-    public long CustomerId { get; }
-    public long AccountId { get; }
+    public int CustomerId { get; }
+    public int AccountId { get; }
     public bool Succeeded { get; }
 }

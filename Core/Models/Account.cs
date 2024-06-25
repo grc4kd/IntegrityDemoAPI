@@ -4,12 +4,12 @@ namespace Core.Models;
 
 public class Account
 {
-    public long Id { get; }
+    public int Id { get; }
     public decimal Balance { get; protected set; }
     public AccountStatus AccountStatus { get; private set; }
     public Currency AccountCurrency { get; private set; }
 
-    public Account(long id, decimal balance = 0m, AccountStatusCode statusCode = AccountStatusCode.OPEN)
+    public Account(int id, decimal balance = 0m, AccountStatusCode statusCode = AccountStatusCode.OPEN)
     {
         Id = id;
         Balance = balance;

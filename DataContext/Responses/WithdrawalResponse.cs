@@ -2,7 +2,7 @@ using DataContext.Models;
 
 namespace DataContext.Responses;
 
-public record WithdrawalResponse(long CustomerId, long AccountId, decimal Balance, bool Succeeded)
+public record WithdrawalResponse(int CustomerId, int AccountId, decimal Balance, bool Succeeded)
     : IAccountResponse
 {
     public WithdrawalResponse(IAccount account) : this(
