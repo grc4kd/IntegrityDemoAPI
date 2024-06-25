@@ -1,4 +1,5 @@
 using DataContext;
+using DataContext.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebApi;
@@ -17,19 +18,21 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllersWithViews();
+        services.AddScoped<ICustomerAccountRepository, CustomerAccountRepository>();
+
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
         if (Environment.IsDevelopment())
         {
-            services.AddDbContext<AccountContext>(options =>
+            services.AddDbContext<CustomerAccountContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("AccountContext"),
                     a => a.MigrationsAssembly("WebApi")));
         }
         else
         {
-            services.AddDbContext<AccountContext>(options =>
+            services.AddDbContext<CustomerAccountContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("ProductionAccountContext"),
                     a => a.MigrationsAssembly("WebApi")));

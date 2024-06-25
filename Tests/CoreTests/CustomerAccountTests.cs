@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace Tests.CoreTests;
 
-public class AccountTests
+public class CustomerAccountTests
 {
     [Fact]
     public void DepositAmount_CheckBalance()
@@ -10,7 +10,11 @@ public class AccountTests
         decimal amount = 112;
         var expectedBalance = 2287.13m;
 
-        var account = new CustomerAccount(balance: 2175.13m);
+        var account = new CustomerAccount(
+            accountTypeId: AccountType.AccountTypeId("Checking"),
+            accountStatusCode: AccountStatusCode.OPEN,
+            id: 0,
+            balance: 2175.13m);
         var deposit = new Deposit(amount);
 
         account.MakeDeposit(deposit);
@@ -19,12 +23,16 @@ public class AccountTests
     }
 
     [Fact]
-    public void WithdrawAmount_CheckBalance() 
+    public void WithdrawAmount_CheckBalance()
     {
         decimal amount = 112;
         decimal expectedBalance = 2287.13m;
-        
-        var account = new CustomerAccount(balance: 2399.13m);
+
+        var account = new CustomerAccount(
+            id: 0,
+            accountTypeId: AccountType.AccountTypeId("Checking"),
+            accountStatusCode: AccountStatusCode.OPEN,
+            balance: 2399.13m);
         var withdrawal = new Withdrawal(amount);
 
         account.MakeWithdrawal(withdrawal);
@@ -53,7 +61,7 @@ public class AccountTests
     }
 
     [Fact]
-    public void CloseAccount_WithNonZeroBalance_CheckException() 
+    public void CloseAccount_WithNonZeroBalance_CheckException()
     {
         long accountId = 3;
         decimal balance = 0.10m;

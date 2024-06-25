@@ -2,7 +2,7 @@ namespace Core.Models;
 
 public static class AccountType
 {
-    public static int AccountTypeCode(string accountTypeName) => accountTypeName switch
+    public static int AccountTypeId(string accountTypeName) => accountTypeName switch
     {
         "Checking" => 1,
         "Savings" => 2,

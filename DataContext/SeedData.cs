@@ -7,9 +7,9 @@ public class SeedData
 {
     private static readonly Random random = new(517552500);
 
-    public static void Initialize(DbContextOptions<AccountContext> contextOptions)
+    public static void Initialize(DbContextOptions<CustomerAccountContext> contextOptions)
     {
-        using var context = new AccountContext(contextOptions);
+        using var context = new CustomerAccountContext(contextOptions);
 
         context.Database.EnsureCreated();
 

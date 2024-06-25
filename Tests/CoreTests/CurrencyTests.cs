@@ -2,14 +2,10 @@ using Core.Models.CurrencyTypes;
 
 namespace Tests.CoreTests;
 
-[Collection("Environment collection")]
-public class CurrencyTests(EnvironmentFixture fixture)
+public class CurrencyTests
 {
-    // test collection fixture loads default currency code for all tests in this class
-    readonly EnvironmentFixture fixture = fixture;
-
     [Fact]
-    public void EnvironmentFixture_Default_USD()
+    public void Environment_DefaultCurrencyCode_IsSet()
     {
         string? defaultCurrencyCode = Environment.GetEnvironmentVariable("DefaultCurrencyCode");
 

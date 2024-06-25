@@ -9,7 +9,7 @@ public record OpenAccountResponse(long CustomerId, long AccountId, bool Succeede
             account.Customer.Id,
             account.Id,
             Succeeded: account.Id > -1 && account.Customer.Id > -1,
-            account.AccountTypeCode,
+            account.AccountTypeId,
             account.Balance
         )
     { }

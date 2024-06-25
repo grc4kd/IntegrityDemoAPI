@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace WebApi.Migrations
 {
-    [DbContext(typeof(AccountContext))]
+    [DbContext(typeof(CustomerAccountContext))]
     [Migration("20240623025917_AddCustomerAccountStatus")]
     partial class AddCustomerAccountStatus
     {

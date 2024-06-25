@@ -9,5 +9,5 @@ public class CustomerAccount : IAccount
     public long Id { get; set; }
     public decimal Balance { get; set; }
     public string AccountStatus { get; set; } = AccountStatusCode.OPEN.ToString();
-    public int AccountTypeCode { get; set; } = AccountType.AccountTypeCode("Checking");
+    public int AccountTypeId { get; set; } = AccountType.AccountTypeId("Checking");
 };
