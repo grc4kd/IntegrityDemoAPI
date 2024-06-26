@@ -15,8 +15,6 @@ public class CustomerAccountRepositoryTests : IDisposable
 
     public CustomerAccountRepositoryTests()
     {
-        Environment.SetEnvironmentVariable("DefaultCurrencyCode", "USD");
-
         _connection = new SqliteConnection("Filename=:memory:");
         _connection.Open();
 
