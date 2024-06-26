@@ -1,2 +1,4 @@
 /bin
 /obj
+WebApi/Account.db-shm
+WebApi/Account.db-wal
