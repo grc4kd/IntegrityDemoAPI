@@ -43,7 +43,7 @@ namespace WebApi.Controllers
         /// <returns><see cref="DepositResponse"/>a JSON response with deposit transaction data</returns>
         [ProducesErrorResponseType(typeof(BadRequest))]
         [HttpPost("MakeDeposit")]
-        public DepositResponse MakeDeposit(DepositRequest depositRequest)
+        public IAccountResponse MakeDeposit(DepositRequest depositRequest)
         {
             return _repository.MakeDeposit(depositRequest);
         }
@@ -55,7 +55,7 @@ namespace WebApi.Controllers
         /// <returns><see cref="WithdrawalResponse"/>a JSON response with withdrawal transaction data</returns>
         [ProducesErrorResponseType(typeof(BadRequest))]
         [HttpPost("MakeWithdrawal")]
-        public WithdrawalResponse MakeWithdrawal(WithdrawalRequest withdrawalRequest)
+        public IAccountResponse MakeWithdrawal(WithdrawalRequest withdrawalRequest)
         {
             return _repository.MakeWithdrawal(withdrawalRequest);
         }

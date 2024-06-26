@@ -28,16 +28,21 @@ public class CustomerAccountRepository : ICustomerAccountRepository
             .Take(maxLength);
     }
 
-    public DepositResponse MakeDeposit(DepositRequest request)
+    public IAccountResponse MakeDeposit(DepositRequest request)
     {
-
         if (request.Amount < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(request),
-                $"Expected {nameof(DepositRequest)} {nameof(request.Amount)} to be positive or zero.");
+            return new ErrorResponse(request.CustomerId, request.AccountId) {
+                Error = $"Expected {nameof(DepositRequest)} {nameof(request.Amount)} to be positive or zero."
+            };                
         }
 
         CustomerAccount customerAccount = FindAccount(request.AccountId);
+
+        if (request.CustomerId != customerAccount.Customer.Id) {
+            return new ErrorResponse(request.CustomerId, request.AccountId,
+                $"Customer ID {request.CustomerId} does not match Customer ID for Account ID {request.AccountId}.");
+        }
 
         var model = CustomerAccountMapper.MapToModelContext(customerAccount);
 
@@ -51,15 +56,21 @@ public class CustomerAccountRepository : ICustomerAccountRepository
         return new DepositResponse(customerAccount);
     }
 
-    public WithdrawalResponse MakeWithdrawal(WithdrawalRequest request)
+    public IAccountResponse MakeWithdrawal(WithdrawalRequest request)
     {
         if (request.Amount <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(request),
+            return new ErrorResponse(request.CustomerId, request.AccountId,
                 $"Expected {nameof(WithdrawalRequest)} {nameof(request.Amount)} to be greater than zero.");
         }
 
         var customerAccount = FindAccount(request.AccountId);
+
+        if (request.CustomerId != customerAccount.Customer.Id) 
+        {
+            return new ErrorResponse(request.CustomerId, request.AccountId,
+                $"Customer ID {request.CustomerId} does not match Customer ID for Account ID {request.AccountId}.");
+        }
 
         var model = CustomerAccountMapper.MapToModelContext(customerAccount);
 
@@ -131,7 +142,7 @@ public class CustomerAccountRepository : ICustomerAccountRepository
             .Include(a => a.Customer)
             .Where(a => a.Id == id)
             .SingleOrDefault() ??
-            throw new ArgumentOutOfRangeException(nameof(id), $"Customer account could not be found, ID: {id}.");
+            throw new ArgumentOutOfRangeException(nameof(id), $"Customer account could not be found, Account ID: {id}.");
     }
 }
 

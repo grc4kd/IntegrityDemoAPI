@@ -42,14 +42,17 @@ public class CustomerAccountControllerTests
 
         var controller = new CustomerAccountController(repositoryMock.Object);
 
-        var withdrawalResponse = controller.MakeWithdrawal(withdrawalRequest);
+        var response = controller.MakeWithdrawal(withdrawalRequest);
 
         var getCustomerAccount = controller.GetCustomerAccount(testCustomerAccount.Id);
 
-        Assert.IsType<WithdrawalResponse>(withdrawalResponse);
-        Assert.Equal(expectedBalance, withdrawalResponse.Balance);
         Assert.NotNull(getCustomerAccount);
         Assert.Equal(expectedBalance, getCustomerAccount.Balance);
+
+        Assert.IsType<WithdrawalResponse>(response);
+        var withdrawalResponse = response as WithdrawalResponse;
+        Assert.NotNull(withdrawalResponse);
+        Assert.Equal(expectedBalance, withdrawalResponse.Balance);
     }
 
     [Fact]
@@ -91,10 +94,13 @@ public class CustomerAccountControllerTests
 
         var getCustomerAccount = controller.GetCustomerAccount(testCustomerAccount.Id);
 
-        Assert.IsType<DepositResponse>(response);
-        Assert.Equal(expectedBalance, response.Balance);
         Assert.NotNull(getCustomerAccount);
         Assert.Equal(expectedBalance, getCustomerAccount.Balance);
+
+        Assert.IsType<DepositResponse>(response);
+        var depositResponse = response as DepositResponse;
+        Assert.NotNull(depositResponse);
+        Assert.Equal(expectedBalance, depositResponse.Balance);
     }
 
     [Fact]
@@ -147,7 +153,7 @@ public class CustomerAccountControllerTests
         repositoryMock.Setup(r => r.MakeWithdrawal(withdrawalRequest))
             .Returns(new WithdrawalResponse(customerAccount));
 
-        var withdrawalResponse = controller.MakeWithdrawal(withdrawalRequest);
+        var withdrawalAccountResponse = controller.MakeWithdrawal(withdrawalRequest);
 
         var closeAccountRequest = new CloseAccountRequest() {
             AccountId = customerAccount.Id,
@@ -166,10 +172,14 @@ public class CustomerAccountControllerTests
         Assert.Equal(testCustomerAccount.Customer.Id, openAccountResponse.CustomerId);
         Assert.Equal(testCustomerAccount.Id, openAccountResponse.AccountId);
 
-        Assert.True(withdrawalResponse.Succeeded);
+        Assert.Equal(testCustomerAccount.Customer.Id, withdrawalAccountResponse.CustomerId);
+        Assert.Equal(testCustomerAccount.Id, withdrawalAccountResponse.AccountId);
+        Assert.True(withdrawalAccountResponse.Succeeded);
+
+        Assert.IsType<WithdrawalResponse>(withdrawalAccountResponse);
+        var withdrawalResponse = withdrawalAccountResponse as WithdrawalResponse;
+        Assert.NotNull(withdrawalResponse);
         Assert.Equal(expectedBalance, withdrawalResponse.Balance);
-        Assert.Equal(testCustomerAccount.Customer.Id, withdrawalResponse.CustomerId);
-        Assert.Equal(testCustomerAccount.Id, withdrawalResponse.AccountId);
 
         Assert.True(closeAccountResponse.Succeeded);
         Assert.Equal(testCustomerAccount.Customer.Id, closeAccountResponse.CustomerId);

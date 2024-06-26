@@ -14,6 +14,8 @@ public class Program
 
         startup.Configure(app, app.Environment);
 
+        app.UseHttpsRedirection();
+
         app.UseAuthorization();
 
         app.MapControllers();

@@ -1,8 +1,9 @@
 using Core.Models;
+using Tests.Fixtures;
 
 namespace Tests.CoreTests;
 
-public class CustomerAccountTests
+public class CustomerAccountTests : IClassFixture<DefaultCurrencyCodeFixture>
 {
     [Fact]
     public void DepositAmount_CheckBalance()

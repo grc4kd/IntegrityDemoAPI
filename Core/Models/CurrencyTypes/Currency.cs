@@ -12,7 +12,7 @@ public record Currency(string CurrencyCode, decimal MinimumDenomination)
     {
         if (amount.Scale > MinimumDenomination.Scale)
         {
-            throw new ArgumentOutOfRangeException(nameof(amount), $"Balance amount: {amount} has fractional value less than the minimum denomination for currency code: {CurrencyCode}.");
+            throw new ArgumentOutOfRangeException(nameof(amount), $"Decimal amount: {amount} has fractional value less than the minimum denomination for currency code: {CurrencyCode}.");
         }
 
         if (amount % MinimumDenomination > 0)
@@ -20,4 +20,6 @@ public record Currency(string CurrencyCode, decimal MinimumDenomination)
             throw new ArgumentOutOfRangeException(nameof(amount), $"Balance amount: {amount} cannot be broken down into the minimum denomination: {MinimumDenomination}.");
         }
     }
+
+    public void ValidateAmount(double amount) => ValidateAmount((decimal)amount);
 }

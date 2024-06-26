@@ -5,10 +5,11 @@ using DataContext.Requests;
 using DataContext.Responses;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Tests.Fixtures;
 
 namespace Tests.WebApiTests;
 
-public class CustomerAccountRepositoryTests : IDisposable
+public class CustomerAccountRepositoryTests : IDisposable, IClassFixture<DefaultCurrencyCodeFixture>
 {
     private readonly SqliteConnection _connection;
     private readonly DbContextOptions<CustomerAccountContext> _contextOptions;
@@ -78,12 +79,15 @@ public class CustomerAccountRepositoryTests : IDisposable
         var response = repository.MakeDeposit(request);
 
         Assert.NotNull(response);
+        Assert.True(response.Succeeded);
+        Assert.Equal(testAccount.Id, response.AccountId);
+        Assert.Equal(testAccount.Customer.Id, response.CustomerId);
+    
+        // the web controller would be a good place to implement the mediator patterrn
         Assert.IsType<DepositResponse>(response);
-        Assert.Multiple(() =>
-        {
-            Assert.Equal(expectedBalance, response.Balance);
-            Assert.True(response.Succeeded);
-        });
+        var depositResponse = response as DepositResponse;
+        Assert.NotNull(depositResponse);
+        Assert.Equal(expectedBalance, depositResponse.Balance);
     }
 
     [Fact]
@@ -112,9 +116,14 @@ public class CustomerAccountRepositoryTests : IDisposable
 
         var response = repository.MakeWithdrawal(request);
 
-        Assert.IsType<WithdrawalResponse>(response);
-        Assert.Equal(expectedBalance, response.Balance);
         Assert.True(response.Succeeded);
+        Assert.Equal(testAccount.Id, response.AccountId);
+        Assert.Equal(testAccount.Customer.Id, response.CustomerId);
+        
+        Assert.IsType<WithdrawalResponse>(response);
+        var withdrawalResponse = response as WithdrawalResponse;
+        Assert.NotNull(withdrawalResponse);
+        Assert.Equal(expectedBalance, withdrawalResponse.Balance);
     }
 
     [Fact]
@@ -198,5 +207,129 @@ public class CustomerAccountRepositoryTests : IDisposable
         };
 
         Assert.Throws<InvalidOperationException>(() => repository.CloseCustomerAccount(closeAccountRequest));
+    }
+
+    [Fact]
+    public void Deposit_FractionalAmount_CheckException()
+    {
+        double depositAmount = 111.999d;
+        decimal openingBalance = 2399.13m;
+
+        using var resetContext = CreateContext();
+        var testAccount = CreateTestAccount();
+        resetContext.Attach(testAccount);
+
+        testAccount.Balance = openingBalance;
+
+        resetContext.SaveChanges();
+
+        var repository = new CustomerAccountRepository(CreateContext());
+
+        var request = new DepositRequest()
+        {
+            AccountId = testAccount.Id,
+            CustomerId = testAccount.Customer.Id,
+            Amount = depositAmount
+        };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => repository.MakeDeposit(request));
+    }
+
+    [Fact]
+    public void Withdrawal_FractionalAmount_CheckException()
+    {
+        double withdrawalAmount = 112.001d;
+        decimal openingBalance = 2399.13m;
+
+        using var resetContext = CreateContext();
+        var testAccount = CreateTestAccount();
+        resetContext.Attach(testAccount);
+
+        testAccount.Balance = openingBalance;
+
+        resetContext.SaveChanges();
+
+        var repository = new CustomerAccountRepository(CreateContext());
+
+        var request = new WithdrawalRequest()
+        {
+            AccountId = testAccount.Id,
+            CustomerId = testAccount.Customer.Id,
+            Amount = withdrawalAmount
+        };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => repository.MakeWithdrawal(request));
+    }
+
+    [Fact]
+    public void Deposit_NoCustomerIdMatch_CheckError() 
+    {
+        double depositAmount = 113.99d;
+        decimal openingBalance = 2399.13m;
+        int invalidCustomerId = 0;
+
+        using var resetContext = CreateContext();
+        var testAccount = CreateTestAccount();
+        resetContext.Attach(testAccount);
+
+        testAccount.Balance = openingBalance;
+
+        resetContext.SaveChanges();
+
+        var repository = new CustomerAccountRepository(CreateContext());
+
+        var request = new DepositRequest()
+        {
+            AccountId = testAccount.Id,
+            CustomerId = invalidCustomerId,
+            Amount = depositAmount
+        };
+
+        var response = repository.MakeDeposit(request);
+
+        Assert.False(response.Succeeded);
+        Assert.Equal(testAccount.Id, response.AccountId);
+        Assert.Equal(invalidCustomerId, response.CustomerId);
+
+        Assert.IsType<ErrorResponse>(response);
+        var errorResponse = response as ErrorResponse;
+        Assert.NotNull(errorResponse);
+        Assert.NotEmpty(errorResponse.Error);
+    }
+
+    [Fact]
+    public void Withdrawal_NoCustomerIdMatch_CheckError() 
+    {
+        double withdrawalAmount = 114.00d;
+        decimal openingBalance = 2399.13m;
+        int invalidCustomerId = 0;
+
+        using var resetContext = CreateContext();
+        var testAccount = CreateTestAccount();
+        resetContext.Attach(testAccount);
+
+        testAccount.Balance = openingBalance;
+
+        resetContext.SaveChanges();
+
+        var repository = new CustomerAccountRepository(CreateContext());
+
+        var request = new WithdrawalRequest()
+        {
+            AccountId = testAccount.Id,
+            CustomerId = invalidCustomerId,
+            Amount = withdrawalAmount
+        };
+
+        var response = repository.MakeWithdrawal(request);
+
+        Assert.False(response.Succeeded);
+        Assert.Equal(testAccount.Id, response.AccountId);
+        Assert.Equal(invalidCustomerId, response.CustomerId);
+
+        Assert.IsType<ErrorResponse>(response);
+        var errorResponse = response as ErrorResponse;
+        Assert.NotNull(errorResponse);
+        Assert.NotEmpty(errorResponse.Error);
     }
 }
